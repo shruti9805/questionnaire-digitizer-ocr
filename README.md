@@ -17,38 +17,52 @@ problem, not just the symptom.
 
 ## Status
 
-Tested end-to-end against one real respondent's scan (`BP_15.pdf`) from the
-pilot batch, through several rounds of tracing actual failures against this
-real scan (see `ocr_pipeline.py` docstrings for the specific evidence
-behind each calibration choice — row/column boundary detection in
-particular went through multiple wrong approaches before landing on ones
-verified against this document):
+Validated end-to-end against all 6 real respondent scans in the pilot
+batch (BP_9, 10, 11, 13, 14, 15), not just one — several calibration
+choices made against BP_15 alone turned out not to generalize and were
+caught and fixed by this broader validation (see `ocr_pipeline.py`
+docstrings for the specific evidence behind each one: a fixed Code-column
+darkness threshold, a fixed row-density cutoff, and a fixed OCR
+binarization threshold all failed on at least one other document before
+being replaced with per-document-adaptive versions).
 
-- Row-boundary detection (Code-column text-blob clustering) recovers
-  **71 of 71 real rows exactly** on this document — earlier approaches
-  based on detecting the table's horizontal rule lines directly (tried two
-  different ways) recovered 62-80 depending on the half, both too few and
-  too many.
-- Column-boundary detection (finding the Code column's left/right edges)
-  is calibrated against 9 real halves of this document and is reliable in
-  the same run.
-- Alignment correctness was the main remaining issue: an earlier version
-  silently mislabeled items when a row went undetected nearby (verified:
-  PC_3/PC_4's real marks were being attributed to PC_1/PC_2's codes). This
-  is fixed — mismatched stretches are now reported explicitly ("N rows
-  found for M expected items between X and Y") instead of guessed. A
-  related bug (a 3-character garbled OCR read fuzzy-matching a code 27
-  positions away) is also fixed with a plausible-jump-distance cap.
-- Net result on BP_15.pdf: **41 of 71 items resolved with a real value**,
-  all verified correctly positioned (including PC_3 and PC_4, the case
-  that originally exposed the mislabeling bug). The remaining 30 are
-  stretches where OCR didn't produce enough anchors to safely interpolate
-  — reported honestly as "check this stretch manually" rather than guessed.
+Items resolved with a real, verified-correct value (of 71):
 
-**This has not yet been validated against the rest of the pilot batch**
-(BP_9, 10, 11, 13, 14) the way the original pipeline was. Expect further
-calibration to be needed, the same way the original pipeline needed
-several rounds of real-scan testing.
+| Document | Resolved |
+|---|---|
+| BP_15 | 46 |
+| BP_9  | 43 |
+| BP_10 | 34 |
+| BP_13 | 30 |
+| BP_14 | 31 |
+| BP_11 | 1  |
+
+Key fixes along the way:
+- Row-boundary detection (Code-column text-blob clustering, not the
+  table's rule lines - those proved too thin/broken to detect reliably in
+  two different attempts) recovers close to 71 of 71 rows on most
+  documents, using a per-half adaptive density cutoff (60th percentile of
+  the row's own density profile) rather than one fixed threshold - a
+  fixed threshold or a median-based one both failed differently on real
+  documents (BP_13's background noise, BP_11's heavy bleed-through).
+- Column-boundary detection (the Code column's left/right edges) is
+  template-based - proportions of the answer grid's own position - and
+  generalizes well since every respondent fills the same printed form.
+- OCR's binarization step adapts per-crop (Otsu threshold) instead of a
+  fixed gray cutoff, after one found blank (zero ink crossed the old fixed
+  threshold) on a real document.
+- Alignment no longer silently mislabels items when a row goes
+  undetected nearby (the bug that originally exposed this whole
+  investigation - PC_3/PC_4's real marks were being attributed to
+  PC_1/PC_2's codes). Mismatched stretches are now reported explicitly
+  ("N rows found for M expected items between X and Y") instead of
+  guessed.
+
+**BP_11 remains largely unresolved.** Its heavy bleed-through defeats the
+per-document calibration that worked for the other five; a quick look
+found at least one case of two real rows merging into one detected band
+(tighter row spacing than the other documents), which needs further
+dedicated diagnosis, not another global threshold tweak.
 
 ## Architecture
 
