@@ -187,7 +187,7 @@ def find_grid_layout(rgb: np.ndarray, min_run_frac: float = 0.08) -> GridLayout 
     # outside the observed 82-92px range (two of 9 halves) means a window
     # didn't find its genuine line - the proportional midpoint estimate is
     # used instead rather than trusting a bad peak.
-    MARGIN = 150
+    MARGIN = 300
     y_top = max(0, min(l[1] for l in grid_lines) - MARGIN)
     y_bottom = max(l[2] for l in grid_lines) + MARGIN
     dark_table_rows = dark[y_top:y_bottom, :]
