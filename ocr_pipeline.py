@@ -212,45 +212,62 @@ def find_row_bands(rgb: np.ndarray, layout: GridLayout) -> list[tuple[int, int]]
     label (e.g. "PC_3") printed near its top, surrounded by a large blank
     gap down to the next row's label - the statement text's own multi-line
     height is what makes that gap large, not anything about the rule
-    lines. Clustering the Code column's dark pixels directly (the same
-    connected-run clustering already used for ink/mark detection, not a
-    new technique) finds these label blobs reliably: verified to recover
-    exactly 71 of 71 rows on BP_15.pdf, where the rule-line approaches
-    recovered 62-80 (both too few and too many, varying by half). The
-    border lines bounding the Code column itself must be excluded from
-    this scan (an 8px inward margin) - included, a column border's own
-    continuous height bridges every row's gap into one giant cluster,
-    which was the actual cause of a near-total detection failure before
-    this margin was added, not a flaw in the clustering logic itself.
+    lines. The border lines bounding the Code column itself must be
+    excluded from this scan (an 8px inward margin) - included, a column
+    border's own continuous height bridges every row's gap into one giant
+    cluster.
 
-    Row boundaries are then the midpoints between consecutive label
-    blobs, from `y_top` to `y_bottom`."""
+    A single fixed darkness threshold for "is this pixel ink" does not
+    generalize across different respondents' scans: one real scan
+    (BP_13.pdf) had a low but non-zero background density of ~1-4%
+    *everywhere* in the Code column (paper texture/scan noise, not text),
+    which a threshold tuned loose enough to catch fainter ink elsewhere
+    also picked up as one unbroken "row", while a threshold tight enough
+    to reject it also rejected genuine but lighter ink on other documents.
+    Nor is a fixed *multiple of the column's own median density* robust -
+    tried first, it failed on a different real scan (BP_11.pdf) whose
+    Code column carries unusually heavy bleed-through, pushing the median
+    itself high enough that almost nothing cleared the resulting cutoff.
+
+    What generalized, checked against row-detection totals across all 6
+    real respondent scans gathered so far (71, 63-73, 40-60 depending on
+    scan quality, vs. 71 expected on every document - tighter and more
+    consistent than any fixed threshold tried): per row, compute the
+    fraction of dark pixels across the Code column's width, then set the
+    text-vs-background cutoff at the 60th percentile of that profile plus
+    35% of the way to its peak. Using a percentile rather than the mean/
+    median is what survives BP_11.pdf's heavy bleed-through - a row of
+    genuine text is a small minority of any row's height, so even a noisy
+    document's quieter majority of rows still anchors the low end of the
+    profile, which the median (pulled toward dense content) could not."""
     h, w, _ = rgb.shape
     gray = np.array(Image.fromarray(rgb).convert("L"))
     x0, x1 = min(w, layout.code_x0 + 8), min(w, layout.code_x1 - 8)
     if x1 <= x0:
         return []
     dark = gray[layout.y_top:layout.y_bottom, x0:x1] < 235
-    ys, _ = np.where(dark)
+    row_frac = dark.mean(axis=1)
+    peak = row_frac.max()
+    if peak < 0.03:
+        return []
+    baseline = np.percentile(row_frac, 60)
+    cutoff = max(baseline + 0.35 * (peak - baseline), baseline + 0.03)
+    is_text = row_frac > cutoff
+    ys = np.where(is_text)[0]
     if len(ys) == 0:
         return []
-    ys = np.sort(ys) + layout.y_top
+    ys = ys + layout.y_top
 
     Y_GAP = 25
-    MIN_PIXELS = 15
     blobs: list[tuple[int, int]] = []
     cur = [ys[0]]
     for y in ys[1:]:
         if y - cur[-1] <= Y_GAP:
             cur.append(y)
         else:
-            if len(cur) >= MIN_PIXELS:
-                blobs.append((cur[0], cur[-1]))
+            blobs.append((cur[0], cur[-1]))
             cur = [y]
-    if len(cur) >= MIN_PIXELS:
-        blobs.append((cur[0], cur[-1]))
-    if not blobs:
-        return []
+    blobs.append((cur[0], cur[-1]))
 
     centers = [(a + b) // 2 for a, b in blobs]
     boundaries = [layout.y_top] + [
@@ -265,17 +282,35 @@ CODE_PATTERN = re.compile(r"[A-Z]{1,3}_?\s?\d{1,2}")
 
 
 def _preprocess_for_ocr(crop: Image.Image) -> Image.Image:
+    """A fixed binarization threshold (previously gray>150) does not
+    generalize: verified on a real scan (BP_13.pdf) whose code-text ink
+    never got darker than 158, so every pixel fell on the "white" side of
+    that fixed cutoff and the processed image was blank - OCR had nothing
+    to read, independent of anything about row/column detection. Otsu's
+    threshold, computed on this crop's own grayscale histogram, adapts
+    to each respondent's actual ink darkness the same way ink-mask
+    calibration already does elsewhere in this pipeline."""
     gray = crop.convert("L")
     scale = 3
     up = gray.resize((gray.width * scale, gray.height * scale), Image.LANCZOS)
     arr = np.array(up)
-    bw = ((arr > 150) * 255).astype(np.uint8)
+    normalized = arr.astype(float) / 255.0
+    if normalized.max() - normalized.min() < 0.05:
+        return Image.fromarray(np.full_like(arr, 255, dtype=np.uint8))
+    otsu = _otsu_threshold(normalized, bins=50)
+    bw = ((normalized > otsu) * 255).astype(np.uint8)
     return Image.fromarray(bw)
 
 
 def ocr_row_code(rgb: np.ndarray, layout: GridLayout, y0: int, y1: int) -> str | None:
     h, w, _ = rgb.shape
-    x0, x1 = max(0, layout.code_x0), min(w, layout.code_x1)
+    # +6 excludes the Sr.No|Code border line (confirmed bleeding into a
+    # tight crop and confusing Tesseract's layout analysis); +18 beyond
+    # the calibrated right edge gives trailing digits room - the
+    # Code|Statement boundary was calibrated as a column-structure
+    # estimate, not a pixel-exact text bound, and a real crop at exactly
+    # that edge was found clipping the code's last character.
+    x0, x1 = max(0, layout.code_x0 + 6), min(w, layout.code_x1 + 18)
     if x1 - x0 < 5 or y1 - y0 < 5:
         return None
     crop = Image.fromarray(rgb[y0:y1, x0:x1])
