@@ -552,28 +552,34 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
     cursor = 0
     for i, row in enumerate(all_rows):
         matched = fuzzy_match_code(row.ocr_code, known_codes, code_to_position=code_to_item, cursor=cursor)
-        if matched:
-            pos = code_to_item[matched]["position"]
-            if cursor < pos <= cursor + MAX_PLAUSIBLE_JUMP:
-                row.matched_code = matched
-                row.anchored_by = "code"
-                anchors.append((i, pos))
-                cursor = pos
-                continue
-        # Code OCR failed or was rejected - fall back to the Sr.No column,
-        # a second, independent position signal. Checked across 4 real
-        # documents: plain digits read far more reliably than the Code
-        # column's mixed letters+underscore+digits, recovering an anchor
-        # on several rows where the Code read was too garbled for any
-        # fuzzy match at all. Sr.No is the schema position directly (no
-        # fuzzy lookup needed) - the same jump-distance cap applies, since
-        # a misread digit is just as capable of a coincidentally-plausible
-        # wrong jump as a garbled code string.
-        if row.ocr_srno and cursor < row.ocr_srno <= cursor + MAX_PLAUSIBLE_JUMP:
-            pos = row.ocr_srno
+        code_pos = code_to_item[matched]["position"] if matched else None
+        code_valid = code_pos is not None and cursor < code_pos <= cursor + MAX_PLAUSIBLE_JUMP
+        srno_valid = row.ocr_srno is not None and cursor < row.ocr_srno <= cursor + MAX_PLAUSIBLE_JUMP
+
+        # When both signals are available, Sr.No - a direct digit read,
+        # not a fuzzy string match - is trusted first, including when the
+        # two disagree. Verified necessary on a real BP_15.pdf failure: a
+        # short, truncated Code read ("S_4", missing its leading "P")
+        # fuzzy-matched some other "_4"-suffixed code only 1 position from
+        # the cursor - a small, plausible-looking jump that was still
+        # wrong - while the row's Sr.No read that same row as "53"
+        # unambiguously (no fuzzy matching involved at all), which was
+        # correct. A short OCR string is far more prone to this kind of
+        # coincidentally-plausible wrong match than a clean digit parse.
+        if code_valid and srno_valid and code_pos == row.ocr_srno:
+            row.matched_code = matched
+            row.anchored_by = "code+srno"
+            anchors.append((i, code_pos))
+            cursor = code_pos
+        elif srno_valid:
             row.anchored_by = "srno"
-            anchors.append((i, pos))
-            cursor = pos
+            anchors.append((i, row.ocr_srno))
+            cursor = row.ocr_srno
+        elif code_valid:
+            row.matched_code = matched
+            row.anchored_by = "code"
+            anchors.append((i, code_pos))
+            cursor = code_pos
 
     position_to_row: dict[int, RowResult] = {}
     position_to_note: dict[int, str] = {}
@@ -660,7 +666,9 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
             ))
         elif row.value is None:
             confidence = "ok" if row.anchored_by else "low"
-            if row.anchored_by == "code":
+            if row.anchored_by == "code+srno":
+                note = f"row located (code and Sr.No both agree on position {row.ocr_srno}), but no mark detected in it - please check manually"
+            elif row.anchored_by == "code":
                 note = f"row located (code read as '{row.ocr_code}'), but no mark detected in it - please check manually"
             elif row.anchored_by == "srno":
                 note = f"row located (Sr.No read as '{row.ocr_srno}'), but no mark detected in it - please check manually"
