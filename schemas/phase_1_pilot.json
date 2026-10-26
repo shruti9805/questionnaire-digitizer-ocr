@@ -1,0 +1,510 @@
+{
+  "name": "Phase 1 - Pilot",
+  "source_docx_filename": "Student_Survey_Bilingual.docx",
+  "items": [
+    {
+      "position": 1,
+      "code": "ER_1",
+      "statement_en": "My academic submissions are marked and assessed fairly.",
+      "statement_hi": "मेरे अकादमिक कार्यों का मूल्यांकन निष्पक्ष रूप से किया जाता है।"
+    },
+    {
+      "position": 2,
+      "code": "ER_2",
+      "statement_en": "I am provided feedback on all academic aspects in the same way as my peers.",
+      "statement_hi": "मुझे अपने सहपाठियों के समान ही सभी अकादमिक पहलुओं पर फीडबैक प्रदान किया जाता है।"
+    },
+    {
+      "position": 3,
+      "code": "ER_3",
+      "statement_en": "My teachers cover the topics they say they will teach and timely complete the syllabus planned for the year.",
+      "statement_hi": "मेरे शिक्षक उन विषयों को पढ़ाते हैं जिनके लिए वे कहते हैं और वर्ष के लिए निर्धारित पाठ्यक्रम को समय पर पूरा करते हैं।"
+    },
+    {
+      "position": 4,
+      "code": "ER_4",
+      "statement_en": "I trust that the rules and expectations in my school are applied the same way to every student.",
+      "statement_hi": "मुझे विश्वास है कि मेरे स्कूल के नियम और अपेक्षाएं हर छात्र पर समान रूप से लागू होती हैं।"
+    },
+    {
+      "position": 5,
+      "code": "ER_5",
+      "statement_en": "I can rely on my school to follow through on what it promises events, and activities happen as planned.",
+      "statement_hi": "मैं अपने स्कूल पर भरोसा कर सकता हूँ कि वह अपने वादों को पूरा करेगा; कार्यक्रम और गतिविधियां योजना के अनुसार होती हैं।"
+    },
+    {
+      "position": 6,
+      "code": "ER_6",
+      "statement_en": "I feel that the time I spend in school is used productively and is not wasted on administrative delays.",
+      "statement_hi": "मुझे लगता है कि स्कूल में बिताया गया मेरा समय उत्पादक रूप से उपयोग किया जाता है और प्रशासनिक देरी में बर्बाद नहीं होता है।"
+    },
+    {
+      "position": 7,
+      "code": "RE_1",
+      "statement_en": "I feel supported when I struggle my learning needs are noticed and someone helps me.",
+      "statement_hi": "जब मुझे कठिनाई होती है तो मुझे सहयोग महसूस होता है; मेरी सीखने की जरूरतों पर ध्यान दिया जाता है और कोई मेरी मदद करता है।"
+    },
+    {
+      "position": 8,
+      "code": "RE_2",
+      "statement_en": "I experience different styles of teaching in my classes, which helps me understand things in the way that works best for me.",
+      "statement_hi": "मैं अपनी कक्षाओं में पढ़ाने के विभिन्न तरीकों का अनुभव करता हूँ, जिससे मुझे चीजों को उस तरीके से समझने में मदद मिलती है जो मेरे लिए सबसे उपयुक्त है।"
+    },
+    {
+      "position": 9,
+      "code": "RE_3",
+      "statement_en": "I get a response when I have a question or concern about my studies, I do not feel ignored.",
+      "statement_hi": "जब मुझे अपनी पढ़ाई के बारे में कोई प्रश्न या चिंता होती है तो मुझे जवाब मिलता है, मुझे अनदेखा महसूस नहीं होता।"
+    },
+    {
+      "position": 10,
+      "code": "RE_4",
+      "statement_en": "I learn better because of the digital tools and technology used in my school they make things clearer and more interesting.",
+      "statement_hi": "मैं अपने स्कूल में उपयोग किए जाने वाले डिजिटल उपकरणों और तकनीक के कारण बेहतर सीखता हूँ; वे चीजों को स्पष्ट और अधिक रोचक बनाते हैं।"
+    },
+    {
+      "position": 11,
+      "code": "RE_5",
+      "statement_en": "I feel that my school adjusts how it teaches based on how well students are actually learning.",
+      "statement_hi": "मुझे लगता है कि छात्र वास्तव में कितना अच्छा सीख रहे हैं, इसके आधार पर मेरा स्कूल अपने पढ़ाने के तरीके में बदलाव करता है।"
+    },
+    {
+      "position": 12,
+      "code": "RE_6",
+      "statement_en": "I am aware of a way to raise concerns and questions in my school and feel that concerns are taken seriously.",
+      "statement_hi": "मुझे अपने स्कूल में चिंताओं और सवालों को उठाने के तरीके के बारे में पता है और मुझे लगता है कि चिंताओं को गंभीरता से लिया जाता है।"
+    },
+    {
+      "position": 13,
+      "code": "EO_1",
+      "statement_en": "I feel that my reading, writing, and maths skills have clearly improved this school year.",
+      "statement_hi": "मुझे लगता है कि इस स्कूल वर्ष में मेरे पढ़ने, लिखने और गणित के कौशल में स्पष्ट रूप से सुधार हुआ है।"
+    },
+    {
+      "position": 14,
+      "code": "EO_2",
+      "statement_en": "I am given tasks that make me think deeply, solve problems, and use what I have learnt in new situations not just memorise facts.",
+      "statement_hi": "मुझे ऐसे कार्य दिए जाते हैं जो मुझे गहराई से सोचने, समस्याओं को हल करने और नई स्थितियों में जो मैंने सीखा है उसका उपयोग करने के लिए प्रेरित करते हैं, न कि केवल तथ्यों को याद रखने के लिए।"
+    },
+    {
+      "position": 15,
+      "code": "EO_3",
+      "statement_en": "The things I learn in school feel relevant to my life, society and the world I will live in.",
+      "statement_hi": "स्कूल में मैं जो चीजें सीखता हूँ, वे मुझे मेरे जीवन, समाज और उस दुनिया के लिए प्रासंगिक लगती हैं जिसमें मैं रहूँगा।"
+    },
+    {
+      "position": 16,
+      "code": "EO_4",
+      "statement_en": "I learn skills like working in a team, communicating clearly, and using technology that I will need in the future.",
+      "statement_hi": "मैं एक टीम में काम करने, स्पष्ट रूप से संवाद करने और प्रौद्योगिकी का उपयोग करने जैसे कौशल सीखता हूँ जिनकी मुझे भविष्य में आवश्यकता होगी।"
+    },
+    {
+      "position": 17,
+      "code": "EO_5",
+      "statement_en": "I feel that all students including weaker students are actually learning and not just a few high performers.",
+      "statement_hi": "मुझे लगता है कि कमजोर छात्रों सहित सभी छात्र वास्तव में सीख रहे हैं, न कि केवल कुछ उच्च प्रदर्शन करने वाले।"
+    },
+    {
+      "position": 18,
+      "code": "EO_6",
+      "statement_en": "I am encouraged to be curious, to ask questions, think about my future and to keep learning even outside of class.",
+      "statement_hi": "मुझे जिज्ञासु होने, सवाल पूछने, अपने भविष्य के बारे में सोचने और कक्षा के बाहर भी सीखते रहने के लिए प्रोत्साहित किया जाता है।"
+    },
+    {
+      "position": 19,
+      "code": "EO_7",
+      "statement_en": "My teachers include local stories, real life examples, and knowledge from my community in what they teach me.",
+      "statement_hi": "मेरे शिक्षक मुझे जो पढ़ाते हैं उसमें स्थानीय कहानियाँ, वास्तविक जीवन के उदाहरण और मेरे समुदाय के ज्ञान को शामिल करते हैं।"
+    },
+    {
+      "position": 20,
+      "code": "EM_1",
+      "statement_en": "I feel genuinely seen and valued as a person in my school not just my score.",
+      "statement_hi": "मुझे अपने स्कूल में केवल मेरे अंकों के रूप में नहीं, बल्कि एक व्यक्ति के रूप में वास्तव में देखा और महत्व दिया जाता है।"
+    },
+    {
+      "position": 21,
+      "code": "EM_2",
+      "statement_en": "I feel welcomed and respected in my classroom regardless of my background, gender, caste, or ability.",
+      "statement_hi": "मेरी पृष्ठभूमि, लिंग, जाति या क्षमता की परवाह किए बिना, मुझे अपनी कक्षा में स्वागत और सम्मान महसूस होता है।"
+    },
+    {
+      "position": 22,
+      "code": "EM_3",
+      "statement_en": "I feel that someone at school notices when I am going through a difficult time and genuinely tries to help.",
+      "statement_hi": "मुझे लगता है कि स्कूल में कोई ध्यान देता है जब मैं कठिन समय से गुजर रहा होता हूँ और वास्तव में मदद करने की कोशिश करता है।"
+    },
+    {
+      "position": 23,
+      "code": "EM_4",
+      "statement_en": "My teachers encourage me and help me believe that I can learn and succeed even when I find something difficult.",
+      "statement_hi": "मेरे शिक्षक मुझे प्रोत्साहित करते हैं और यह विश्वास करने में मदद करते हैं कि मैं सीख सकता हूँ और सफल हो सकता हूँ, तब भी जब मुझे कुछ मुश्किल लगता है।"
+    },
+    {
+      "position": 24,
+      "code": "EM_5",
+      "statement_en": "Students from poorer or more disadvantaged backgrounds receive as much attention and opportunity to learn as other students in my school.",
+      "statement_hi": "मेरे स्कूल में गरीब या अधिक वंचित पृष्ठभूमि के छात्रों को अन्य छात्रों के समान ही ध्यान और सीखने का अवसर मिलता है।"
+    },
+    {
+      "position": 25,
+      "code": "EM_6",
+      "statement_en": "I have opportunities in school to develop beyond academics through sports, arts, cultural activities, or other interests.",
+      "statement_hi": "मुझे स्कूल में खेल, कला, सांस्कृतिक गतिविधियों या अन्य रुचियों के माध्यम से शिक्षा के अलावा खुद को विकसित करने के अवसर मिलते हैं।"
+    },
+    {
+      "position": 26,
+      "code": "DI_1",
+      "statement_en": "I have access to computers, tablets, projectors, in school for learning.",
+      "statement_hi": "मुझे सीखने के लिए स्कूल में कंप्यूटर, टैबलेट, प्रोजेक्टर तक पहुंच प्राप्त है।"
+    },
+    {
+      "position": 27,
+      "code": "DI_2",
+      "statement_en": "I can use the internet at school without it being too slow or unreliable to be useful.",
+      "statement_hi": "मैं स्कूल में इंटरनेट का उपयोग कर सकता हूँ और यह इतना धीमा या अविश्वसनीय नहीं होता कि अनुपयोगी हो जाए।"
+    },
+    {
+      "position": 28,
+      "code": "DI_3",
+      "statement_en": "I find that digital equipment in my school works properly when it is needed; it is not always broken or unavailable.",
+      "statement_hi": "मुझे लगता है कि मेरे स्कूल में डिजिटल उपकरण जरूरत पड़ने पर ठीक से काम करते हैं; वे हमेशा टूटे हुए या अनुपलब्ध नहीं होते हैं।"
+    },
+    {
+      "position": 29,
+      "code": "DI_4",
+      "statement_en": "I know that if a device or tool stops working, it gets fixed quickly so learning is not disrupted for long.",
+      "statement_hi": "मुझे पता है कि अगर कोई उपकरण या टूल काम करना बंद कर देता है, तो उसे जल्दी से ठीक कर दिया जाता है ताकि सीखने में लंबे समय तक बाधा न आए।"
+    },
+    {
+      "position": 30,
+      "code": "DI_5",
+      "statement_en": "I have the same access to digital tools as other students in my school, no one is left out.",
+      "statement_hi": "मुझे भी स्कूल के अन्य छात्रों की तरह ही डिजिटल उपकरणों तक समान पहुंच प्राप्त है, कोई भी छूटता नहीं है।"
+    },
+    {
+      "position": 31,
+      "code": "DI_6",
+      "statement_en": "I can access learning content provided by my school through an app or online platform like Google Classroom.",
+      "statement_hi": "मैं Google Classroom जैसे ऐप या ऑनलाइन प्लेटफ़ॉर्म के माध्यम से अपने स्कूल द्वारा प्रदान की गई शिक्षण सामग्री तक पहुंच सकता हूँ।"
+    },
+    {
+      "position": 32,
+      "code": "TC_1",
+      "statement_en": "I feel that my teachers are able to use digital tools like smart boards, apps, and online platforms; comfortably and confidently in their lessons.",
+      "statement_hi": "मुझे लगता है कि मेरे शिक्षक अपने पाठों में स्मार्ट बोर्ड, ऐप और ऑनलाइन प्लेटफ़ॉर्म जैसे डिजिटल उपकरणों का आराम और आत्मविश्वास से उपयोग करने में सक्षम हैं।"
+    },
+    {
+      "position": 33,
+      "code": "TC_2",
+      "statement_en": "I have noticed that my teachers choose the right and interesting digital tool for each subject and lesson.",
+      "statement_hi": "मैंने देखा है कि मेरे शिक्षक प्रत्येक विषय और पाठ के लिए सही और रोचक डिजिटल उपकरण चुनते हैं।"
+    },
+    {
+      "position": 34,
+      "code": "TC_3",
+      "statement_en": "I feel that the way teachers use technology in my school keeps improving.",
+      "statement_hi": "मुझे लगता है कि मेरे स्कूल में शिक्षकों द्वारा तकनीक का उपयोग करने के तरीके में सुधार होता रहता है।"
+    },
+    {
+      "position": 35,
+      "code": "TC_4",
+      "statement_en": "I feel that when my teachers use digital tools, it genuinely makes it easier for me to understand the topic.",
+      "statement_hi": "मुझे लगता है कि जब मेरे शिक्षक डिजिटल उपकरणों का उपयोग करते हैं, तो इससे मेरे लिए विषय को समझना वास्तव में आसान हो जाता है।"
+    },
+    {
+      "position": 36,
+      "code": "TC_5",
+      "statement_en": "I learn from my teachers that technology is something to explore and use thoughtfully, not just to look to make things interesting",
+      "statement_hi": "मैं अपने शिक्षकों से सीखता हूँ कि प्रौद्योगिकी कुछ ऐसा है जिसे सोच-समझकर खोजना और उपयोग करना चाहिए, न कि केवल चीजों को रोचक बनाने के लिए देखना चाहिए।"
+    },
+    {
+      "position": 37,
+      "code": "TC_6",
+      "statement_en": "I notice that my teachers bring new digital approaches into lessons regularly; they are not doing the same thing every year.",
+      "statement_hi": "मैं ध्यान देता हूँ कि मेरे शिक्षक नियमित रूप से पाठों में नए डिजिटल दृष्टिकोण लाते हैं; वे हर साल एक ही काम नहीं कर रहे हैं।"
+    },
+    {
+      "position": 38,
+      "code": "DP_1",
+      "statement_en": "I learn better through videos, animations or interactive websites as they make subjects easier to understand.",
+      "statement_hi": "मैं वीडियो, एनिमेशन या इंटरैक्टिव वेबसाइटों के माध्यम से बेहतर सीखता हूँ क्योंकि वे विषयों को समझना आसान बनाते हैं।"
+    },
+    {
+      "position": 39,
+      "code": "DP_2",
+      "statement_en": "I participate more actively in class because of the way technology is used; it is not just me sitting and watching.",
+      "statement_hi": "जिस तरह से तकनीक का उपयोग किया जाता है, उसके कारण मैं कक्षा में अधिक सक्रिय रूप से भाग लेता हूँ; यह केवल मेरा बैठकर देखना नहीं है।"
+    },
+    {
+      "position": 40,
+      "code": "DP_3",
+      "statement_en": "I experience learning where I use digital content before class and then apply or discuss it in school.",
+      "statement_hi": "मैं ऐसे सीखने का अनुभव करता हूँ जहाँ मैं कक्षा से पहले डिजिटल सामग्री का उपयोग करता हूँ और फिर स्कूल में इसे लागू करता हूँ या इस पर चर्चा करता हूँ।"
+    },
+    {
+      "position": 41,
+      "code": "DP_4",
+      "statement_en": "I notice that technology in my school changes how I learn; it is not just a digital version of the old blackboard.",
+      "statement_hi": "मैं ध्यान देता हूँ कि मेरे स्कूल में तकनीक मेरे सीखने के तरीके को बदल देती है; यह केवल पुराने ब्लैकबोर्ड का डिजिटल संस्करण नहीं है।"
+    },
+    {
+      "position": 42,
+      "code": "DP_5",
+      "statement_en": "I find that digital learning is a normal and regular part of my school day.",
+      "statement_hi": "मुझे लगता है कि डिजिटल लर्निंग मेरे स्कूल के दिन का एक सामान्य और नियमित हिस्सा है।"
+    },
+    {
+      "position": 43,
+      "code": "DP_6",
+      "statement_en": "I am developing skills for using technology responsibly and wisely; not just for entertainment.",
+      "statement_hi": "मैं केवल मनोरंजन के लिए नहीं, बल्कि जिम्मेदारी से और समझदारी से प्रौद्योगिकी का उपयोग करने के लिए कौशल विकसित कर रहा हूँ।"
+    },
+    {
+      "position": 44,
+      "code": "DS_1",
+      "statement_en": "I can see that my school has a clear plan for using technology things are organised and purposeful.",
+      "statement_hi": "मैं देख सकता हूँ कि मेरे स्कूल के पास तकनीक का उपयोग करने की एक स्पष्ट योजना है, चीजें व्यवस्थित और उद्देश्यपूर्ण हैं।"
+    },
+    {
+      "position": 45,
+      "code": "DS_2",
+      "statement_en": "I feel that my school tracks how I am learning and uses that information to help me.",
+      "statement_hi": "मुझे लगता है कि मेरा स्कूल ट्रैक करता है कि मैं कैसे सीख रहा हूँ और मेरी मदद करने के लिए उस जानकारी का उपयोग करता है।"
+    },
+    {
+      "position": 46,
+      "code": "DS_3",
+      "statement_en": "I experience personalised support when I fall behind, my school uses information about my progress to help me catch up.",
+      "statement_hi": "जब मैं पीछे रह जाता हूँ तो मुझे व्यक्तिगत समर्थन का अनुभव होता है, मेरा स्कूल मुझे आगे बढ़ने में मदद करने के लिए मेरी प्रगति के बारे में जानकारी का उपयोग करता है।"
+    },
+    {
+      "position": 47,
+      "code": "DS_4",
+      "statement_en": "I feel that students who cannot access technology at home are given alternatives so they do not fall behind.",
+      "statement_hi": "मुझे लगता है कि जिन छात्रों के पास घर पर तकनीक तक पहुंच नहीं है, उन्हें विकल्प दिए जाते हैं ताकि वे पीछे न रहें।"
+    },
+    {
+      "position": 48,
+      "code": "DS_5",
+      "statement_en": "I know who to go to in my school when I need help with technology there is someone responsible I can ask things to.",
+      "statement_hi": "मुझे पता है कि जब मुझे तकनीक के संबंध में मदद की आवश्यकता होती है तो मुझे अपने स्कूल में किसके पास जाना चाहिए; एक जिम्मेदार व्यक्ति है जिससे मैं मदद मांग सकता हूँ।"
+    },
+    {
+      "position": 49,
+      "code": "DS_6",
+      "statement_en": "I know the rules for using technology safely and responsibly in my school and I understand why they matter.",
+      "statement_hi": "मुझे अपने स्कूल में सुरक्षित और जिम्मेदारी से तकनीक का उपयोग करने के नियम पता हैं और मैं समझता हूँ कि वे क्यों मायने रखते हैं।"
+    },
+    {
+      "position": 50,
+      "code": "PS_1",
+      "statement_en": "I feel physically safe in my school building I am not afraid of being hurt, bullied, or harassed.",
+      "statement_hi": "मैं अपने स्कूल की इमारत में शारीरिक रूप से सुरक्षित महसूस करता हूँ; मुझे आहत होने, डराए जाने या परेशान किए जाने का डर नहीं है।"
+    },
+    {
+      "position": 51,
+      "code": "PS_2",
+      "statement_en": "I know what to do if an emergency happens at school because we have been told about safety procedures such as fire exits or sickroom.",
+      "statement_hi": "मुझे पता है कि स्कूल में कोई आपात स्थिति होने पर क्या करना चाहिए क्योंकि हमें आग से बचाव या बीमार कक्ष जैसी सुरक्षा प्रक्रियाओं के बारे में बताया गया है।"
+    },
+    {
+      "position": 52,
+      "code": "PS_3",
+      "statement_en": "I feel comfortable making mistakes in class without being afraid of being mocked or punished harshly.",
+      "statement_hi": "मैं उपहास किए जाने या कठोर दंड दिए जाने के डर के बिना कक्षा में गलतियाँ करने में सहज महसूस करता हूँ।"
+    },
+    {
+      "position": 53,
+      "code": "PS_4",
+      "statement_en": "I experience fair discipline in school. I am not treated differently from others because of who I am.",
+      "statement_hi": "मैं स्कूल में उचित अनुशासन का अनुभव करता हूँ। मेरी पहचान के कारण मेरे साथ दूसरों से अलग व्यवहार नहीं किया जाता है।"
+    },
+    {
+      "position": 54,
+      "code": "PS_5",
+      "statement_en": "I feel that bullying or unkind behaviour is taken seriously and acted upon in my school.",
+      "statement_hi": "मुझे लगता है कि मेरे स्कूल में बदमाशी या निर्दयी व्यवहार को गंभीरता से लिया जाता है और उस पर कार्रवाई की जाती है।"
+    },
+    {
+      "position": 55,
+      "code": "PS_6",
+      "statement_en": "I feel emotionally safe at school it is a place where I can be myself without fear.",
+      "statement_hi": "मैं स्कूल में भावनात्मक रूप से सुरक्षित महसूस करता हूँ; यह एक ऐसी जगह है जहाँ मैं बिना किसी डर के अपने असली रूप में रह सकता हूँ।"
+    },
+    {
+      "position": 56,
+      "code": "PS_7",
+      "statement_en": "I feel respected by the adults in my school no teacher or staff member humiliates students.",
+      "statement_hi": "मैं अपने स्कूल में वयस्कों द्वारा सम्मानित महसूस करता हूँ; कोई भी शिक्षक या स्टाफ सदस्य छात्रों को अपमानित नहीं करता है।"
+    },
+    {
+      "position": 57,
+      "code": "AS_1",
+      "statement_en": "I see different ways of teaching like discussions, group work, activities, and projects to help me learn better.",
+      "statement_hi": "मैं बेहतर ढंग से सीखने में मेरी मदद करने के लिए चर्चाओं, समूह कार्य, गतिविधियों और परियोजनाओं जैसे शिक्षण के विभिन्न तरीके देखता हूँ।"
+    },
+    {
+      "position": 58,
+      "code": "AS_2",
+      "statement_en": "My teachers give me tasks that challenge me to think, analyse, and apply what I have learnt; not just copy or memorise.",
+      "statement_hi": "मेरे शिक्षक मुझे ऐसे कार्य देते हैं जो मुझे सोचने, विश्लेषण करने और जो मैंने सीखा है उसे लागू करने की चुनौती देते हैं; न कि केवल कॉपी करने या याद करने की।"
+    },
+    {
+      "position": 59,
+      "code": "AS_3",
+      "statement_en": "I feel motivated to work hard because what I am learning feels meaningful and worthwhile.",
+      "statement_hi": "मैं कड़ी मेहनत करने के लिए प्रेरित महसूस करता हूँ क्योंकि मैं जो सीख रहा हूँ वह सार्थक और उपयोगी लगता है।"
+    },
+    {
+      "position": 60,
+      "code": "AS_4",
+      "statement_en": "I am able to concentrate in class because my learning environment; light and seating is comfortable.",
+      "statement_hi": "मैं कक्षा में ध्यान केंद्रित करने में सक्षम हूँ क्योंकि मेरा सीखने का माहौल; रोशनी और बैठने की व्यवस्था आरामदायक है।"
+    },
+    {
+      "position": 61,
+      "code": "AS_5",
+      "statement_en": "I receive clear and useful feedback on my work that tells me exactly how to improve.",
+      "statement_hi": "मुझे अपने काम पर स्पष्ट और उपयोगी प्रतिक्रिया मिलती है जो मुझे ठीक-ठीक बताती है कि सुधार कैसे किया जाए।"
+    },
+    {
+      "position": 62,
+      "code": "IR_1",
+      "statement_en": "I feel students and teachers in my school treat each other with kindness and respect.",
+      "statement_hi": "मुझे लगता है कि मेरे स्कूल में छात्र और शिक्षक एक-दूसरे के साथ दया और सम्मान से पेश आते हैं।"
+    },
+    {
+      "position": 63,
+      "code": "IR_2",
+      "statement_en": "I feel comfortable with my classmates we treat each other with kindness and respect.",
+      "statement_hi": "मैं अपने सहपाठियों के साथ सहज महसूस करता हूँ; हम एक-दूसरे के साथ दया और सम्मान से पेश आते हैं।"
+    },
+    {
+      "position": 64,
+      "code": "IR_3",
+      "statement_en": "I feel included in all classroom activities and group work .",
+      "statement_hi": "मैं सभी कक्षा की गतिविधियों और समूह कार्यों में शामिल महसूस करता हूँ।"
+    },
+    {
+      "position": 65,
+      "code": "IR_4",
+      "statement_en": "I feel that my background, culture, or identity is respected and valued in my school.",
+      "statement_hi": "मुझे लगता है कि मेरे स्कूल में मेरी पृष्ठभूमि, संस्कृति या पहचान का सम्मान किया जाता है और उसे महत्व दिया जाता है।"
+    },
+    {
+      "position": 66,
+      "code": "IR_5",
+      "statement_en": "I feel that my family is kept informed and involved in my education.",
+      "statement_hi": "मुझे लगता है कि मेरे परिवार को मेरी शिक्षा के बारे में सूचित रखा जाता है और उसमें शामिल किया जाता है।"
+    },
+    {
+      "position": 67,
+      "code": "PC_1",
+      "statement_en": "I experience a school where teachers work together and this makes my learning better.",
+      "statement_hi": "मैं एक ऐसे स्कूल का अनुभव करता हूँ जहाँ शिक्षक एक साथ काम करते हैं और इससे मेरी सीख बेहतर होती है।"
+    },
+    {
+      "position": 68,
+      "code": "PC_2",
+      "statement_en": "I feel that the way my school is run is purposeful, there is a clear direction and things function well.",
+      "statement_hi": "मुझे लगता है कि जिस तरह से मेरा स्कूल चलाया जाता है वह उद्देश्यपूर्ण है, एक स्पष्ट दिशा है और चीजें अच्छी तरह से काम करती हैं।"
+    },
+    {
+      "position": 69,
+      "code": "PC_3",
+      "statement_en": "I feel that my opinion about school life matters; there are ways for me to give feedback and be heard.",
+      "statement_hi": "मुझे लगता है कि स्कूल के जीवन के बारे में मेरी राय मायने रखती है; मेरे लिए फीडबैक देने और सुने जाने के तरीके हैं।"
+    },
+    {
+      "position": 70,
+      "code": "PC_4",
+      "statement_en": "I feel that time in school is well managed lessons start and end on time and routines are consistent.",
+      "statement_hi": "मुझे लगता है कि स्कूल में समय का अच्छी तरह से प्रबंधन किया जाता है; पाठ समय पर शुरू और समाप्त होते हैं और दिनचर्या सुसंगत है।"
+    },
+    {
+      "position": 71,
+      "code": "PC_5",
+      "statement_en": "I feel proud to be a student at my school.",
+      "statement_hi": "मुझे अपने स्कूल का छात्र होने पर गर्व महसूस होता है।"
+    }
+  ],
+  "demo_fields": [
+    {
+      "position": 0,
+      "label_en": "Name of school",
+      "label_hi": "स्कूल का नाम",
+      "field_type": "text",
+      "options": null
+    },
+    {
+      "position": 1,
+      "label_en": "District/ Block",
+      "label_hi": "जिला / ब्लॉक",
+      "field_type": "text",
+      "options": null
+    },
+    {
+      "position": 2,
+      "label_en": "Class / Grade of child",
+      "label_hi": "बच्चे की कक्षा / ग्रेड",
+      "field_type": "text",
+      "options": null
+    },
+    {
+      "position": 3,
+      "label_en": "School Attendance",
+      "label_hi": "स्कूल में उपस्थिति",
+      "field_type": "single_choice",
+      "options": [
+        "Rarely miss school",
+        "Miss 1 or 2 days in a month",
+        "Miss 3 to 5 days in a month",
+        "Miss more than 5 days in a month"
+      ]
+    },
+    {
+      "position": 4,
+      "label_en": "Gender",
+      "label_hi": "लिंग",
+      "field_type": "single_choice",
+      "options": [
+        "Male",
+        "Female",
+        "Other"
+      ]
+    },
+    {
+      "position": 5,
+      "label_en": "Approximate annual family income",
+      "label_hi": "अनुमानित वार्षिक पारिवारिक आय :",
+      "field_type": "single_choice",
+      "options": [
+        "Below 1 lakh",
+        "1-5lakh",
+        "5-10 lakh",
+        "Above 10 lakh"
+      ]
+    },
+    {
+      "position": 6,
+      "label_en": "Are you involved in any extracurricular activities like music or games?",
+      "label_hi": "क्या आप संगीत या खेल जैसी किसी पाठ्येतर गतिविधियों में शामिल हैं? (☐ हाँ, ☐ नहीं)",
+      "field_type": "single_choice",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "position": 7,
+      "label_en": "Do you have access to digital devices and internet at home?",
+      "label_hi": "क्या आपके घर पर डिजिटल उपकरण और इंटरनेट की सुविधा है?",
+      "field_type": "single_choice",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ]
+}
