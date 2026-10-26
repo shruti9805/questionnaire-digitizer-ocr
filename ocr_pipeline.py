@@ -349,6 +349,35 @@ def ocr_row_code(rgb: np.ndarray, layout: GridLayout, y0: int, y1: int) -> str |
     return raw
 
 
+SRNO_PATTERN = re.compile(r"\d{1,2}")
+
+
+def ocr_row_srno(rgb: np.ndarray, layout: GridLayout, y0: int, y1: int) -> int | None:
+    """Reads the Sr.No column's row number directly (e.g. "69" for row 69)
+    - a second, independent position signal alongside the Code column.
+    Checked against 4 real documents: plain digits read far more reliably
+    than the Code column's mixed letters+underscore+digits (which need an
+    exact or near-exact fuzzy match against the schema to be useful at
+    all) - most rows across every document tested produced a clean,
+    sequence-consistent integer, including several rows where the Code
+    read was garbled past any usable fuzzy match. Column position is not
+    separately calibrated - a generous fixed-width crop immediately left
+    of the already-calibrated Code column is enough, since digit OCR
+    tolerates extra blank margin far better than it tolerates a tight
+    crop clipping a character."""
+    h, w, _ = rgb.shape
+    x0, x1 = max(0, layout.code_x0 - 65), max(0, layout.code_x0 - 5)
+    if x1 - x0 < 5 or y1 - y0 < 5:
+        return None
+    crop = Image.fromarray(rgb[y0:y1, x0:x1])
+    processed = _preprocess_for_ocr(crop)
+    text = pytesseract.image_to_string(
+        processed, config="--psm 7 -c tessedit_char_whitelist=0123456789",
+    )
+    m = SRNO_PATTERN.search(text.strip())
+    return int(m.group(0)) if m else None
+
+
 def fuzzy_match_code(ocr_code: str | None, known_codes: list[str], cutoff: float = 0.75) -> str | None:
     if not ocr_code:
         return None
@@ -427,6 +456,8 @@ class RowResult:
     value: int | None
     ocr_code: str | None
     matched_code: str | None
+    ocr_srno: int | None = None
+    anchored_by: str | None = None  # "code", "srno", or None (sequential only)
 
 
 def process_half(rgb: np.ndarray, source_label: str) -> list[RowResult]:
@@ -437,9 +468,10 @@ def process_half(rgb: np.ndarray, source_label: str) -> list[RowResult]:
     results = []
     for y0, y1 in bands:
         ocr_code = ocr_row_code(rgb, layout, y0, y1)
+        ocr_srno = ocr_row_srno(rgb, layout, y0, y1)
         value = mark_in_row(rgb, layout, y0, y1)
         results.append(RowResult(source=source_label, y=(y0 + y1) / 2, value=value,
-                                  ocr_code=ocr_code, matched_code=None))
+                                  ocr_code=ocr_code, matched_code=None, ocr_srno=ocr_srno))
     return results
 
 
@@ -508,8 +540,24 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
             pos = code_to_item[matched]["position"]
             if cursor < pos <= cursor + MAX_PLAUSIBLE_JUMP:
                 row.matched_code = matched
+                row.anchored_by = "code"
                 anchors.append((i, pos))
                 cursor = pos
+                continue
+        # Code OCR failed or was rejected - fall back to the Sr.No column,
+        # a second, independent position signal. Checked across 4 real
+        # documents: plain digits read far more reliably than the Code
+        # column's mixed letters+underscore+digits, recovering an anchor
+        # on several rows where the Code read was too garbled for any
+        # fuzzy match at all. Sr.No is the schema position directly (no
+        # fuzzy lookup needed) - the same jump-distance cap applies, since
+        # a misread digit is just as capable of a coincidentally-plausible
+        # wrong jump as a garbled code string.
+        if row.ocr_srno and cursor < row.ocr_srno <= cursor + MAX_PLAUSIBLE_JUMP:
+            pos = row.ocr_srno
+            row.anchored_by = "srno"
+            anchors.append((i, pos))
+            cursor = pos
 
     position_to_row: dict[int, RowResult] = {}
     position_to_note: dict[int, str] = {}
@@ -544,19 +592,19 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
                 source=None, y=None,
             ))
         elif row.value is None:
-            confidence = "ok" if row.matched_code == it["code"] else "low"
-            note = (
-                "row located (code read as "
-                f"'{row.ocr_code}'), but no mark detected in it - please check manually"
-                if row.matched_code
-                else "row located by position only (code not confidently read) and no mark detected"
-            )
+            confidence = "ok" if row.anchored_by else "low"
+            if row.anchored_by == "code":
+                note = f"row located (code read as '{row.ocr_code}'), but no mark detected in it - please check manually"
+            elif row.anchored_by == "srno":
+                note = f"row located (Sr.No read as '{row.ocr_srno}'), but no mark detected in it - please check manually"
+            else:
+                note = "row located by position only (neither code nor Sr.No confidently read) and no mark detected"
             item_results.append(ItemResult(
                 item_id=it["id"], code=it["code"], value=None, confidence="conflict",
                 note=note, source=row.source, y=row.y,
             ))
         else:
-            if row.matched_code == it["code"]:
+            if row.anchored_by:
                 confidence, note = "ok", None
             else:
                 confidence = "low"
