@@ -15,27 +15,35 @@ mark was found on it — to its real schema position *before* any sequential
 mark-counting happens, which is what actually fixes the localization
 problem, not just the symptom.
 
-## Status (first version)
+## Status
 
 Tested end-to-end against one real respondent's scan (`BP_15.pdf`) from the
-pilot batch:
+pilot batch, through several rounds of tracing actual failures against this
+real scan (see `ocr_pipeline.py` docstrings for the specific evidence
+behind each calibration choice — row/column boundary detection in
+particular went through multiple wrong approaches before landing on ones
+verified against this document):
 
-- OCR reliably reads the printed code when the row crop is correctly
-  aligned (validated directly against Tesseract: `ER_1`–`ER_5` all read
-  correctly with 3x upscaling + binarization + a restricted character
-  whitelist).
-- Row-boundary detection (finding where each table row starts/ends) and
-  column-boundary detection (finding the Code column's left/right edges)
-  are the less reliable parts — both needed several rounds of calibration
-  against this real scan (see `ocr_pipeline.py` docstrings for what was
-  tried and why) and are still imperfect: some rows are missed entirely,
-  and OCR doesn't confidently read every row's code even when the row
-  itself is correctly found.
-- Net result on BP_15.pdf: 59 of 71 items got a value (vs. 68 of 71 from
-  the original pipeline's blind count-and-flatten approach), but with
-  correct localization — e.g. the original pipeline always blamed the
-  *last* 3 items (PC_3/4/5) for any shortfall; this version correctly
-  identifies PC_5 as read and PC_3/4 as the genuine gap.
+- Row-boundary detection (Code-column text-blob clustering) recovers
+  **71 of 71 real rows exactly** on this document — earlier approaches
+  based on detecting the table's horizontal rule lines directly (tried two
+  different ways) recovered 62-80 depending on the half, both too few and
+  too many.
+- Column-boundary detection (finding the Code column's left/right edges)
+  is calibrated against 9 real halves of this document and is reliable in
+  the same run.
+- Alignment correctness was the main remaining issue: an earlier version
+  silently mislabeled items when a row went undetected nearby (verified:
+  PC_3/PC_4's real marks were being attributed to PC_1/PC_2's codes). This
+  is fixed — mismatched stretches are now reported explicitly ("N rows
+  found for M expected items between X and Y") instead of guessed. A
+  related bug (a 3-character garbled OCR read fuzzy-matching a code 27
+  positions away) is also fixed with a plausible-jump-distance cap.
+- Net result on BP_15.pdf: **41 of 71 items resolved with a real value**,
+  all verified correctly positioned (including PC_3 and PC_4, the case
+  that originally exposed the mislabeling bug). The remaining 30 are
+  stretches where OCR didn't produce enough anchors to safely interpolate
+  — reported honestly as "check this stretch manually" rather than guessed.
 
 **This has not yet been validated against the rest of the pilot batch**
 (BP_9, 10, 11, 13, 14) the way the original pipeline was. Expect further
