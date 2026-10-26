@@ -147,103 +147,116 @@ def find_grid_layout(rgb: np.ndarray, min_run_frac: float = 0.08) -> GridLayout 
     col_bounds = xs_only if len(xs_only) == 6 else [left + (right - left) * i / 5 for i in range(6)]
 
     # Vertical lines left of the grid (Sr.No|Code and Code|Statement
-    # boundaries), restricted to the table's own y-span (not the whole
-    # half-page, since unrelated tall marks elsewhere on the page -
-    # signatures, demographic-section boxes - would otherwise register as
-    # false column lines). Found by column-wise dark-pixel density rather
-    # than a contiguous-run test: the same thin/broken-line issue found
-    # with the horizontal row rules (see find_row_bands) applies here too
-    # - a genuine column boundary's darkness isn't always one unbroken
-    # run top-to-bottom, so density + a thinness filter is more robust.
-    # When fewer than 2 candidate lines are found this way, fall back to a
-    # proportion of `left` calibrated against several real, correctly
-    # line-detected halves of BP_15.pdf (ratios of 0.15-0.22 and
-    # 0.25-0.31) - less precise, but better than nothing.
+    # boundaries), restricted to the table's own y-span. A single global
+    # density cutoff across the whole pre-grid width proved unreliable
+    # (verified on real halves of BP_15.pdf): the true lines are faint
+    # enough that a cutoff loose enough to catch them also catches
+    # Hindi-text density further right (the statement column's headstroke,
+    # see find_row_bands), while a cutoff tight enough to exclude that
+    # noise excludes some genuine lines too.
+    #
+    # What worked instead: each boundary line's x-position, as a fraction
+    # of `left` (the answer grid's own, reliably-found left edge), is
+    # consistent across real halves - checked directly against 9 halves of
+    # BP_15.pdf: the Sr.No|Code line sits at 0.17-0.23x`left`, the
+    # Code|Statement line at 0.25-0.32x`left` (there is also a third,
+    # fainter line further left around 0.09-0.14x`left` - the table's own
+    # outer left border, not a column boundary - which an earlier version
+    # of this search mistakenly paired with the Sr.No|Code line, cropping
+    # the Sr.No column's digits instead of the Code column's text).
+    # Searching each narrow proportional window independently for its
+    # single highest-density point, rather than one global threshold
+    # across the whole width, avoids Hindi-text density peaks entirely,
+    # since those don't fall inside either window. A resulting width
+    # outside the observed 82-92px range (two of 9 halves) means a window
+    # didn't find its genuine line - the proportional midpoint estimate is
+    # used instead rather than trusting a bad peak.
     MARGIN = 150
     y_top = max(0, min(l[1] for l in grid_lines) - MARGIN)
     y_bottom = max(l[2] for l in grid_lines) + MARGIN
-    dark_table_rows = dark[y_top:y_bottom, :max(0, left - 5)]
+    dark_table_rows = dark[y_top:y_bottom, :]
     col_dark_frac = dark_table_rows.mean(axis=0)
-    cutoff = max(0.35, _otsu_threshold(col_dark_frac, bins=50)) if col_dark_frac.max() >= 0.05 else 1.0
-    is_line = col_dark_frac > cutoff
-    MAX_LINE_THICKNESS = 6
-    all_xs = []
-    cur = []
-    for i, v in enumerate(is_line):
-        if v:
-            cur.append(i)
-        elif cur:
-            if len(cur) <= MAX_LINE_THICKNESS:
-                all_xs.append(int(np.mean(cur)))
-            cur = []
-    if cur and len(cur) <= MAX_LINE_THICKNESS:
-        all_xs.append(int(np.mean(cur)))
-    all_xs.sort()
-    if len(all_xs) >= 2 and (all_xs[-1] - all_xs[-2]) >= 0.08 * left:
-        code_x1, code_x0 = all_xs[-1], all_xs[-2]
+
+    def best_peak_x(frac_lo: float, frac_hi: float) -> int | None:
+        x0, x1 = int(frac_lo * left), int(frac_hi * left)
+        window = col_dark_frac[x0:x1]
+        if len(window) == 0:
+            return None
+        return x0 + int(np.argmax(window))
+
+    cand_x0 = best_peak_x(0.17, 0.23)
+    cand_x1 = best_peak_x(0.25, 0.32)
+    width = (cand_x1 - cand_x0) if (cand_x0 is not None and cand_x1 is not None) else None
+    if width is not None and 65 <= width <= 105:
+        code_x0, code_x1 = cand_x0, cand_x1
     else:
-        code_x0, code_x1 = int(0.14 * left), int(0.30 * left)
+        code_x0, code_x1 = int(0.195 * left), int(0.285 * left)
 
     return GridLayout(answer_left=left, answer_right=right, col_bounds=col_bounds,
                        code_x0=code_x0, code_x1=code_x1, y_top=y_top, y_bottom=y_bottom)
 
 
 def find_row_bands(rgb: np.ndarray, layout: GridLayout) -> list[tuple[int, int]]:
-    """Horizontal rule lines bounding each table row.
+    """Row boundaries, found from the Code column's own printed text
+    rather than the table's horizontal rule lines.
 
-    Unlike the bold, solidly-printed vertical double-lines framing the
-    answer grid, the horizontal row rules in a real scan (verified against
-    BP_15.pdf) are thin and broken by scan noise/antialiasing - the
-    longest *contiguous* dark run at a true rule-line y was only ~27% of
-    the table width, well short of what a contiguous-run test (as used for
-    the vertical lines) would accept. A plain statement-text row, by
-    contrast, has a sustained ~20-26% dark-pixel *density* with no sharp
-    peak. The actual rule lines stood out clearly as a density peak
-    (~45-52%) against that text baseline, so row boundaries are found via
-    per-row dark-pixel density (not contiguous-run length), separated from
-    the text baseline with the same per-document Otsu split already used
-    to calibrate ink detection - a fixed density cutoff would face the
-    same per-document miscalibration risk demonstrated earlier when a
-    single fixed pixel-count threshold was tried for ink detection."""
+    Two earlier approaches at finding the rule lines directly both proved
+    unreliable on real scans: a contiguous-dark-run test (the lines are
+    thin and broken by scan noise - the longest unbroken run at a true
+    rule-line y was only ~27% of the table width) and a density-peak test
+    (text density and rule-line density ranges overlap too much on some
+    halves to separate with one threshold). Both approaches' failures
+    compounded into alignment errors downstream.
+
+    What works instead: each row has exactly one short, isolated code
+    label (e.g. "PC_3") printed near its top, surrounded by a large blank
+    gap down to the next row's label - the statement text's own multi-line
+    height is what makes that gap large, not anything about the rule
+    lines. Clustering the Code column's dark pixels directly (the same
+    connected-run clustering already used for ink/mark detection, not a
+    new technique) finds these label blobs reliably: verified to recover
+    exactly 71 of 71 rows on BP_15.pdf, where the rule-line approaches
+    recovered 62-80 (both too few and too many, varying by half). The
+    border lines bounding the Code column itself must be excluded from
+    this scan (an 8px inward margin) - included, a column border's own
+    continuous height bridges every row's gap into one giant cluster,
+    which was the actual cause of a near-total detection failure before
+    this margin was added, not a flaw in the clustering logic itself.
+
+    Row boundaries are then the midpoints between consecutive label
+    blobs, from `y_top` to `y_bottom`."""
     h, w, _ = rgb.shape
     gray = np.array(Image.fromarray(rgb).convert("L"))
-    # Restricted to the Sr.No/Code columns only (not into the Statement
-    # column): that column holds only Latin digits/codes, while the
-    # Statement column's Hindi text carries a continuous horizontal
-    # headstroke (shirorekha) above each word that reads as a dense,
-    # thin, wide dark band almost indistinguishable from a true rule line
-    # when scanned across the full table width.
-    x0, x1 = max(0, layout.code_x0 - 10), min(w, layout.code_x1)
-    sub = gray[layout.y_top:layout.y_bottom, x0:x1]
-    dark_frac = (sub < 245).mean(axis=1)
-    if dark_frac.max() < 0.05:
+    x0, x1 = min(w, layout.code_x0 + 8), min(w, layout.code_x1 - 8)
+    if x1 <= x0:
         return []
-    cutoff = max(0.35, _otsu_threshold(dark_frac, bins=50))
-    is_line = dark_frac > cutoff
+    dark = gray[layout.y_top:layout.y_bottom, x0:x1] < 235
+    ys, _ = np.where(dark)
+    if len(ys) == 0:
+        return []
+    ys = np.sort(ys) + layout.y_top
 
-    # A density peak alone doesn't distinguish a true rule line from a
-    # densely-printed text line (e.g. bolder Hindi script sometimes also
-    # crosses the density cutoff) - but a rule line is geometrically thin
-    # (a few px tall) while a text line spans a full glyph height, so
-    # filter candidate groups by thickness too.
-    MAX_LINE_THICKNESS = 6
-    groups = []
-    cur = []
-    for i, v in enumerate(is_line):
-        if v:
-            cur.append(i)
-        elif cur:
-            if len(cur) <= MAX_LINE_THICKNESS:
-                groups.append(int(np.mean(cur)) + layout.y_top)
-            cur = []
-    if cur and len(cur) <= MAX_LINE_THICKNESS:
-        groups.append(int(np.mean(cur)) + layout.y_top)
+    Y_GAP = 25
+    MIN_PIXELS = 15
+    blobs: list[tuple[int, int]] = []
+    cur = [ys[0]]
+    for y in ys[1:]:
+        if y - cur[-1] <= Y_GAP:
+            cur.append(y)
+        else:
+            if len(cur) >= MIN_PIXELS:
+                blobs.append((cur[0], cur[-1]))
+            cur = [y]
+    if len(cur) >= MIN_PIXELS:
+        blobs.append((cur[0], cur[-1]))
+    if not blobs:
+        return []
 
-    bands = []
-    for y_top, y_bot in zip(groups, groups[1:]):
-        if y_bot - y_top > 20:  # skip degenerate adjacent-line duplicates
-            bands.append((y_top, y_bot))
-    return bands
+    centers = [(a + b) // 2 for a, b in blobs]
+    boundaries = [layout.y_top] + [
+        (c1 + c2) // 2 for c1, c2 in zip(centers, centers[1:])
+    ] + [layout.y_bottom]
+    return list(zip(boundaries, boundaries[1:]))
 
 
 # ---------- OCR ----------
@@ -427,12 +440,22 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
         all_rows.extend(process_half(right, f"{page_name}:R"))
 
     anchors: list[tuple[int, int]] = []  # (row index into all_rows, schema position)
+    # A match is rejected if it would jump the cursor implausibly far
+    # ahead. Verified necessary on BP_15.pdf: a 3-character garbled OCR
+    # read ("P_3") fuzzy-matched "PS_3" (ratio 0.86, above the 0.75
+    # cutoff) when the row's true identity was ~27 positions earlier -
+    # short reads are inherently ambiguous against a schema with many
+    # codes sharing short suffixes like "_3". No single real gap in this
+    # document's row detection has exceeded ~15 positions, so a jump
+    # past that is far more likely a coincidental short-string match than
+    # a genuine long run of missed rows.
+    MAX_PLAUSIBLE_JUMP = 15
     cursor = 0
     for i, row in enumerate(all_rows):
         matched = fuzzy_match_code(row.ocr_code, known_codes)
         if matched:
             pos = code_to_item[matched]["position"]
-            if pos > cursor:
+            if cursor < pos <= cursor + MAX_PLAUSIBLE_JUMP:
                 row.matched_code = matched
                 anchors.append((i, pos))
                 cursor = pos
