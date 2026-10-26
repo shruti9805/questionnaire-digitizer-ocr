@@ -392,10 +392,27 @@ class ItemResult:
 
 def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[ItemResult]:
     """items: schema rows with 'id', 'code', 'position' (1-indexed, document
-    order). Each detected row is matched to a schema code via OCR when
-    possible; otherwise it continues from the last OCR-confirmed position,
-    the same sequential assumption the original pipeline always used, but
-    now re-anchored at nearly every row instead of never."""
+    order).
+
+    Pass 1 finds "anchors" - rows whose OCR'd code fuzzy-matches a known
+    schema code, keeping only matches that move strictly forward in
+    document order (rejects a wrong/backwards fuzzy hit). Pass 2 then walks
+    the document in segments between consecutive anchors (plus virtual
+    start/end anchors at position 0 and n_expected+1) and only assigns rows
+    to positions within a segment when the count of unanchored rows found
+    there exactly matches the count of schema positions expected there.
+
+    This replaces an earlier version that always filled forward from "the
+    last confirmed position + 1" regardless of whether a row had gone
+    missing earlier in that stretch. Verified against a real failure on
+    BP_15.pdf: a row went undetected a few positions before PC_3/PC_4, so
+    the always-fill-forward approach silently attributed PC_3's and PC_4's
+    real, correctly-detected marks to the wrong item codes (PC_1/PC_2) -
+    the items PC_3/PC_4 then showed as "not detected" even though they
+    were read correctly, just under the wrong label. Requiring an exact
+    count match per segment means a stretch with a missing row is now
+    reported as an honest "can't tell which row is which here" instead of
+    confidently assigning data to the wrong items."""
     pages = render_pdf_pages(pdf_path, work_dir)
     code_to_item = {it["code"]: it for it in items}
     known_codes = list(code_to_item.keys())
@@ -409,23 +426,38 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
             all_rows.extend(process_half(left, f"{page_name}:L"))
         all_rows.extend(process_half(right, f"{page_name}:R"))
 
-    position_to_row: dict[int, RowResult] = {}
-    cursor = 0  # last confirmed schema position (1-indexed); next unanchored row = cursor + 1
-    for row in all_rows:
+    anchors: list[tuple[int, int]] = []  # (row index into all_rows, schema position)
+    cursor = 0
+    for i, row in enumerate(all_rows):
         matched = fuzzy_match_code(row.ocr_code, known_codes)
         if matched:
             pos = code_to_item[matched]["position"]
-            if pos >= cursor:  # reject a match that would move backwards - likely a false OCR hit
+            if pos > cursor:
                 row.matched_code = matched
+                anchors.append((i, pos))
                 cursor = pos
-                if pos not in position_to_row:
-                    position_to_row[pos] = row
-                continue
-        # no usable OCR anchor for this row: fall back to sequential continuation
-        pos = cursor + 1
-        if pos <= n_expected and pos not in position_to_row:
-            position_to_row[pos] = row
-            cursor = pos
+
+    position_to_row: dict[int, RowResult] = {}
+    position_to_note: dict[int, str] = {}
+    for i, pos in anchors:
+        position_to_row[pos] = all_rows[i]
+
+    full_anchors = [(-1, 0)] + anchors + [(len(all_rows), n_expected + 1)]
+    for (prev_idx, prev_pos), (next_idx, next_pos) in zip(full_anchors, full_anchors[1:]):
+        segment_rows = all_rows[prev_idx + 1:next_idx]
+        expected_positions = list(range(prev_pos + 1, next_pos))
+        if len(segment_rows) == len(expected_positions):
+            for pos, row in zip(expected_positions, segment_rows):
+                position_to_row[pos] = row
+        elif expected_positions:
+            note = (
+                f"{len(segment_rows)} row(s) found for {len(expected_positions)} expected "
+                f"item(s) between schema positions {prev_pos} and {next_pos} - cannot "
+                "reliably tell which row is which in this stretch; please check it "
+                "manually against the source PDF"
+            )
+            for pos in expected_positions:
+                position_to_note[pos] = note
 
     item_results = []
     for it in items:
@@ -434,7 +466,8 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
         if row is None:
             item_results.append(ItemResult(
                 item_id=it["id"], code=it["code"], value=None, confidence="conflict",
-                note="no row located for this item in the document", source=None, y=None,
+                note=position_to_note.get(pos, "no row located for this item in the document"),
+                source=None, y=None,
             ))
         elif row.value is None:
             confidence = "ok" if row.matched_code == it["code"] else "low"
