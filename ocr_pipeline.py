@@ -130,20 +130,36 @@ def find_grid_layout(rgb: np.ndarray, min_run_frac: float = 0.08) -> GridLayout 
     lives - verified against real scans, same as the original pipeline),
     then separately finds the Sr.No|Code and Code|Statement boundary lines
     by searching the full width for every vertical line and picking the
-    two immediately left of the answer grid's left edge."""
+    two immediately left of the answer grid's left edge.
+
+    The original min_run_frac=0.08 contiguous-dark-run requirement fails
+    outright (zero lines found) on a real scan with noticeably fainter
+    grid lines than the rest of the pilot batch (BP_11.pdf) - its longest
+    contiguous run anywhere in the grid's true column range was only ~7%
+    of the half's height, just under the 8% floor. Retried at
+    progressively lower fractions (same contiguous-run mechanism, not a
+    different detection method) only when the stricter one finds no
+    width-valid grid - recovers a valid grid on 8 of 9 of that document's
+    halves. The already-working documents are unaffected since 0.08 is
+    always tried first and used whenever it already succeeds."""
     h, w, _ = rgb.shape
     gray = np.array(Image.fromarray(rgb).convert("L"))
     dark = gray < 235
 
     x0 = int(w * 0.5)
-    grid_lines = _find_lines(dark, h, w, min_run_frac, (x0, w))
-    if not grid_lines:
+    xs_only: list[int] = []
+    for frac in (min_run_frac, 0.05, 0.03, 0.02):
+        grid_lines = _find_lines(dark, h, w, frac, (x0, w))
+        if len(grid_lines) < 2:
+            continue
+        candidate_xs = sorted(l[0] for l in grid_lines)
+        grid_width = candidate_xs[-1] - candidate_xs[0]
+        if 0.12 * w <= grid_width <= 0.26 * w:
+            xs_only = candidate_xs
+            break
+    if not xs_only:
         return None
-    xs_only = sorted(l[0] for l in grid_lines)
     left, right = xs_only[0], xs_only[-1]
-    grid_width = right - left
-    if not (0.12 * w <= grid_width <= 0.26 * w):
-        return None
     col_bounds = xs_only if len(xs_only) == 6 else [left + (right - left) * i / 5 for i in range(6)]
 
     # Vertical lines left of the grid (Sr.No|Code and Code|Statement
