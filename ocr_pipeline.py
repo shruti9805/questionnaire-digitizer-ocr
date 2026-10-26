@@ -378,11 +378,27 @@ def ocr_row_srno(rgb: np.ndarray, layout: GridLayout, y0: int, y1: int) -> int |
     return int(m.group(0)) if m else None
 
 
-def fuzzy_match_code(ocr_code: str | None, known_codes: list[str], cutoff: float = 0.75) -> str | None:
+def fuzzy_match_code(ocr_code: str | None, known_codes: list[str], cutoff: float = 0.75,
+                      code_to_position: dict | None = None, cursor: int = 0) -> str | None:
+    """Among codes close enough to fuzzy-match, more than one can tie on
+    string-similarity ratio - verified on a real failure on BP_15.pdf:
+    "OP_4" scored an identical 0.75 against both "DP_4" (position 41,
+    exactly where the row actually was) and "PS_4" (position 53), and
+    difflib's arbitrary tie-break picked the wrong one, discarding the 12
+    real items in between. When `code_to_position` and `cursor` are given,
+    ties (and near-ties) are broken by document proximity instead -
+    whichever plausible candidate is closest to the current cursor is
+    overwhelmingly more likely to be correct than one many positions
+    away, since document order is real information a pure string-
+    similarity ranking ignores entirely."""
     if not ocr_code:
         return None
-    matches = difflib.get_close_matches(ocr_code, known_codes, n=1, cutoff=cutoff)
-    return matches[0] if matches else None
+    matches = difflib.get_close_matches(ocr_code, known_codes, n=5, cutoff=cutoff)
+    if not matches:
+        return None
+    if not code_to_position:
+        return matches[0]
+    return min(matches, key=lambda c: abs(code_to_position[c]["position"] - cursor))
 
 
 # ---------- ink detection (same calibration as the original pipeline) ----------
@@ -535,7 +551,7 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
     MAX_PLAUSIBLE_JUMP = 15
     cursor = 0
     for i, row in enumerate(all_rows):
-        matched = fuzzy_match_code(row.ocr_code, known_codes)
+        matched = fuzzy_match_code(row.ocr_code, known_codes, code_to_position=code_to_item, cursor=cursor)
         if matched:
             pos = code_to_item[matched]["position"]
             if cursor < pos <= cursor + MAX_PLAUSIBLE_JUMP:
@@ -598,7 +614,7 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
             if row.ocr_srno and lo <= row.ocr_srno <= hi:
                 candidate = row.ocr_srno
             else:
-                matched = fuzzy_match_code(row.ocr_code, known_codes)
+                matched = fuzzy_match_code(row.ocr_code, known_codes, code_to_position=code_to_item, cursor=prev_pos)
                 if matched:
                     cand_pos = code_to_item[matched]["position"]
                     if lo <= cand_pos <= hi:
