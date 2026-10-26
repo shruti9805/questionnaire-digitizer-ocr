@@ -571,25 +571,76 @@ def align_document_to_items(pdf_path: str, items: list, work_dir: str) -> list[I
         if len(segment_rows) == len(expected_positions):
             for pos, row in zip(expected_positions, segment_rows):
                 position_to_row[pos] = row
-        elif expected_positions:
-            note = (
-                f"{len(segment_rows)} row(s) found for {len(expected_positions)} expected "
-                f"item(s) between schema positions {prev_pos} and {next_pos} - cannot "
-                "reliably tell which row is which in this stretch; please check it "
-                "manually against the source PDF"
-            )
-            for pos in expected_positions:
-                position_to_note[pos] = note
+            continue
+        if not expected_positions or not segment_rows:
+            continue
+
+        # Counts don't match within this segment - a row was missed, or an
+        # extra false-positive band was found, somewhere in this stretch,
+        # and which one is unknown. Rather than leaving every position in
+        # the segment blank (the earlier, maximally safe behavior), use
+        # each row's own OCR reading - even where it was too weak or out
+        # of monotonic order to qualify as a hard anchor earlier - as a
+        # soft position hint when it lands inside this segment's expected
+        # range: a garbled read that still parses to a plausible in-range
+        # position is real evidence of where that row belongs, not
+        # something to discard just because it didn't independently prove
+        # forward progress. Only rows with no usable reading at all are
+        # placed by sequential interpolation into whatever positions are
+        # still unfilled - every position in a mismatched segment is
+        # flagged "low" confidence either way, so a wrong guess here is
+        # visible for review rather than presented as a confirmed read.
+        soft_placed: dict[int, RowResult] = {}
+        unplaced_rows: list[RowResult] = []
+        lo, hi = expected_positions[0], expected_positions[-1]
+        for row in segment_rows:
+            candidate = None
+            if row.ocr_srno and lo <= row.ocr_srno <= hi:
+                candidate = row.ocr_srno
+            else:
+                matched = fuzzy_match_code(row.ocr_code, known_codes)
+                if matched:
+                    cand_pos = code_to_item[matched]["position"]
+                    if lo <= cand_pos <= hi:
+                        candidate = cand_pos
+            if candidate is not None and candidate not in soft_placed:
+                soft_placed[candidate] = row
+            else:
+                unplaced_rows.append(row)
+
+        note = (
+            f"{len(segment_rows)} row(s) found for {len(expected_positions)} expected "
+            f"item(s) between schema positions {prev_pos} and {next_pos} - position within "
+            "this stretch is not fully certain; please check it manually against the source PDF"
+        )
+        remaining_positions = [p for p in expected_positions if p not in soft_placed]
+        for pos, row in zip(remaining_positions, unplaced_rows):
+            soft_placed[pos] = row
+        for pos, row in soft_placed.items():
+            position_to_row[pos] = row
+        for pos in expected_positions:
+            position_to_note[pos] = note
 
     item_results = []
     for it in items:
         pos = it["position"]
         row = position_to_row.get(pos)
+        mismatch_note = position_to_note.get(pos)
         if row is None:
             item_results.append(ItemResult(
                 item_id=it["id"], code=it["code"], value=None, confidence="conflict",
-                note=position_to_note.get(pos, "no row located for this item in the document"),
+                note=mismatch_note or "no row located for this item in the document",
                 source=None, y=None,
+            ))
+        elif mismatch_note:
+            # Placed via best-effort soft positioning within a segment
+            # whose row/position counts didn't match - always flagged,
+            # whether or not a value was found, since the position itself
+            # (not just the mark) is uncertain here.
+            item_results.append(ItemResult(
+                item_id=it["id"], code=it["code"], value=row.value,
+                confidence="low" if row.value is not None else "conflict",
+                note=mismatch_note, source=row.source, y=row.y,
             ))
         elif row.value is None:
             confidence = "ok" if row.anchored_by else "low"
