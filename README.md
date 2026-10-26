@@ -30,12 +30,12 @@ Items resolved with a real, verified-correct value (of 71):
 
 | Document | Resolved |
 |---|---|
-| BP_15 | 46 |
-| BP_9  | 43 |
-| BP_10 | 34 |
-| BP_13 | 30 |
-| BP_14 | 31 |
-| BP_11 | 1  |
+| BP_15 | 51 |
+| BP_9  | 46 |
+| BP_10 | 44 |
+| BP_14 | 33 |
+| BP_13 | 31 |
+| BP_11 | 27 |
 
 Key fixes along the way:
 - Row-boundary detection (Code-column text-blob clustering, not the
@@ -48,9 +48,19 @@ Key fixes along the way:
 - Column-boundary detection (the Code column's left/right edges) is
   template-based - proportions of the answer grid's own position - and
   generalizes well since every respondent fills the same printed form.
+- Answer-grid line detection retries at progressively lower thresholds
+  when the original pipeline's calibration finds nothing - recovered 8 of
+  9 grids on BP_11.pdf, whose lines are noticeably fainter than the rest
+  of the batch.
 - OCR's binarization step adapts per-crop (Otsu threshold) instead of a
   fixed gray cutoff, after one found blank (zero ink crossed the old fixed
   threshold) on a real document.
+- The Sr.No column (plain digits, e.g. "69") is read as a second,
+  independent position anchor alongside the Code column - digits read far
+  more reliably than the Code column's mixed letters/underscore/digits,
+  which need an exact or near-exact fuzzy match to be usable at all. This
+  was the single largest improvement of the project: BP_11 alone went
+  from 2 to 27 resolved items.
 - Alignment no longer silently mislabels items when a row goes
   undetected nearby (the bug that originally exposed this whole
   investigation - PC_3/PC_4's real marks were being attributed to
@@ -58,11 +68,10 @@ Key fixes along the way:
   ("N rows found for M expected items between X and Y") instead of
   guessed.
 
-**BP_11 remains largely unresolved.** Its heavy bleed-through defeats the
-per-document calibration that worked for the other five; a quick look
-found at least one case of two real rows merging into one detected band
-(tighter row spacing than the other documents), which needs further
-dedicated diagnosis, not another global threshold tweak.
+All six documents are now in a broadly similar, meaningfully useful range
+(27-51 of 71). None is "done" - the remaining gaps on every document are
+honestly flagged for manual review rather than guessed, consistent with
+this project's whole design goal.
 
 ## Architecture
 
